@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package api.ping.v1;
+
+option go_package = "jieyuc.cn/muxu/studio/api/ping/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.ping.v1";
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+service Ping {
+	rpc Ping(google.protobuf.Empty) returns (PingResponse) {
+		option (google.api.http) = {
+			get: "/api/v1/ping"
+		};
+	}
+}
+
+message PingResponse {
+	string ping = 1;
+}
