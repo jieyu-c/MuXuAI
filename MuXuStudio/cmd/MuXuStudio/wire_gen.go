@@ -8,7 +8,9 @@ package main
 
 import (
 	"github.com/go-kratos/kratos/v3"
+	"jieyuc.cn/muxu/studio/internal/biz/user"
 	"jieyuc.cn/muxu/studio/internal/conf"
+	"jieyuc.cn/muxu/studio/internal/data"
 	"jieyuc.cn/muxu/studio/internal/server"
 	"jieyuc.cn/muxu/studio/internal/service"
 	"log/slog"
@@ -21,10 +23,18 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, data *conf.Data, logger *slog.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, confData *conf.Data, logger *slog.Logger) (*kratos.App, func(), error) {
 	pingService := service.NewPingService()
-	httpServer := server.NewHTTPServer(confServer, pingService)
+	dataData, cleanup, err := data.NewData(confData)
+	if err != nil {
+		return nil, nil, err
+	}
+	repo := data.NewUserRepo(dataData)
+	usecase := user.NewUserUsecase(repo)
+	userService := service.NewUserService(usecase)
+	httpServer := server.NewHTTPServer(confServer, pingService, userService)
 	app := newApp(logger, httpServer)
 	return app, func() {
+		cleanup()
 	}, nil
 }

@@ -13,7 +13,7 @@ import (
 type User struct {
 	gorm.Model
 	// Phone stores the canonical E.164 number, including the leading plus sign.
-	Phone string `gorm:"size:16;not null;uniqueIndex"`
+	Phone string `gorm:"size:16;not null;uniqueIndex:idx_users_phone"`
 	// PasswordHash stores the encoded password hash.
 	PasswordHash string `gorm:"type:text;not null" json:"-"`
 }
@@ -27,8 +27,8 @@ func toDomain(user User) *userpkg.User {
 	}
 	return &userpkg.User{
 		ID:           user.ID,
-		Phone:        user.Phone,
-		PasswordHash: userpkg.Password(user.PasswordHash),
+		Phone:        userpkg.Phone{Value: user.Phone},
+		PasswordHash: userpkg.Password{Value: user.PasswordHash},
 		CreatedAt:    user.CreatedAt,
 		UpdatedAt:    user.UpdatedAt,
 		DeletedAt:    deletedAt,
@@ -41,12 +41,12 @@ func toPO(bizUser *userpkg.User) *User {
 		deletedAt = gorm.DeletedAt{Time: *bizUser.DeletedAt, Valid: true}
 	}
 	return &User{
-		ID:           bizUser.ID,
-		CreatedAt:    bizUser.CreatedAt,
-		UpdatedAt:    bizUser.UpdatedAt,
-		DeletedAt:    deletedAt,
-		Phone:        bizUser.Phone,
-		PasswordHash: string(bizUser.PasswordHash),
+		Model: gorm.Model{
+			ID: bizUser.ID, CreatedAt: bizUser.CreatedAt,
+			UpdatedAt: bizUser.UpdatedAt, DeletedAt: deletedAt,
+		},
+		Phone:        bizUser.Phone.Value,
+		PasswordHash: bizUser.PasswordHash.Value,
 	}
 }
 
@@ -54,16 +54,16 @@ type UserRepo struct {
 	data *Data
 }
 
-func NewUserRepo(data *Data) *UserRepo {
+func NewUserRepo(data *Data) userpkg.Repo {
 	return &UserRepo{
 		data: data,
 	}
 }
 
-var _ userpkg.UserRepo = (*UserRepo)(nil)
+var _ userpkg.Repo = (*UserRepo)(nil)
 
-func (u *UserRepo) FindByPhone(ctx context.Context, phone string) (*userpkg.User, error) {
-	user, err := gorm.G[User](u.data.db).Where("phone = %1", phone).First(ctx)
+func (u *UserRepo) FindByPhone(ctx context.Context, phone userpkg.Phone) (*userpkg.User, error) {
+	user, err := gorm.G[User](u.data.db).Where("phone = ?", phone.Value).First(ctx)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	} else if err != nil {
@@ -74,8 +74,5 @@ func (u *UserRepo) FindByPhone(ctx context.Context, phone string) (*userpkg.User
 
 func (u *UserRepo) Create(ctx context.Context, user *userpkg.User) error {
 	err := gorm.G[User](u.data.db).Create(ctx, toPO(user))
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

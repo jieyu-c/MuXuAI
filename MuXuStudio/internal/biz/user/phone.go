@@ -6,29 +6,31 @@ import (
 	"strings"
 )
 
-type Phone string
+type Phone struct {
+	Value string
+}
 
 var mainlandChinaPhone = regexp.MustCompile(`^\+861[3-9][0-9]{9}$`)
 
 func (p *Phone) Valid() error {
-	if p == nil || !mainlandChinaPhone.MatchString(string(*p)) {
+	if p == nil || !mainlandChinaPhone.MatchString(p.Value) {
 		return errors.New("phone must be a mainland China mobile number in +86 format")
 	}
 	return nil
 }
 
 // Standardize returns a validated +86 number without modifying the receiver.
-func (p *Phone) Standardize() (*Phone, error) {
+func (p *Phone) Standardize() error {
 	if p == nil {
-		return nil, p.Valid()
+		return p.Valid()
 	}
-	number := strings.TrimSpace(string(*p))
+	number := strings.TrimSpace(p.Value)
 	if !strings.HasPrefix(number, "+86") {
 		number = "+86" + number
 	}
-	phone := Phone(number)
-	if err := phone.Valid(); err != nil {
-		return nil, err
+	p.Value = number
+	if err := p.Valid(); err != nil {
+		return err
 	}
-	return &phone, nil
+	return nil
 }

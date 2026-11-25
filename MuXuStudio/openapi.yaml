@@ -3,7 +3,7 @@
 
 openapi: 3.0.3
 info:
-    title: Ping API
+    title: ""
     version: 0.0.1
 paths:
     /api/v1/ping:
@@ -18,6 +18,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.ping.v1.PingResponse'
+    /api/v1/users/register:
+        post:
+            tags:
+                - UserService
+            description: |-
+                Register creates a phone-based account. Duplicate registrations return the
+                 generic REGISTER_FAILED error without exposing database conflict details.
+            operationId: UserService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.user.v1.RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
 components:
     schemas:
         api.ping.v1.PingResponse:
@@ -25,5 +43,19 @@ components:
             properties:
                 ping:
                     type: string
+        api.user.v1.RegisterRequest:
+            required:
+                - phone
+                - password
+            type: object
+            properties:
+                phone:
+                    type: string
+                    description: Mainland China mobile number; accepts +86 format or a local mobile number.
+                password:
+                    writeOnly: true
+                    type: string
+                    description: Plaintext password, sent over HTTPS and hashed before storage. Never logged.
 tags:
     - name: Ping
+    - name: UserService

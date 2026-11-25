@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+option go_package = "jieyuc.cn/muxu/studio/api/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.v1";
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/empty.proto";
+
+service UserService {
+  // Register creates a phone-based account. Duplicate registrations return the
+  // generic REGISTER_FAILED error without exposing database conflict details.
+  rpc Register(RegisterRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/api/v1/users/register"
+      body: "*"
+    };
+  }
+}
+
+message RegisterRequest {
+  // Mainland China mobile number; accepts +86 format or a local mobile number.
+  string phone = 1 [(google.api.field_behavior) = REQUIRED];
+  // Plaintext password, sent over HTTPS and hashed before storage. Never logged.
+  string password = 2 [(google.api.field_behavior) = REQUIRED, (google.api.field_behavior) = INPUT_ONLY];
+}

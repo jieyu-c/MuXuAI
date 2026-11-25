@@ -10,6 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v3/middleware/validate"
 	"github.com/go-kratos/kratos/v3/transport/http"
 	pingv1 "jieyuc.cn/muxu/studio/api/ping/v1"
+	userv1 "jieyuc.cn/muxu/studio/api/user/v1"
 	"jieyuc.cn/muxu/studio/internal/conf"
 	"jieyuc.cn/muxu/studio/internal/service"
 
@@ -25,7 +26,7 @@ type HttpResponse struct {
 }
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, ping service.PingService) *http.Server {
+func NewHTTPServer(c *conf.Server, ping service.PingService, user *service.UserService) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -52,6 +53,7 @@ func NewHTTPServer(c *conf.Server, ping service.PingService) *http.Server {
 
 	srv := http.NewServer(opts...)
 	pingv1.RegisterPingHTTPServer(srv, ping)
+	userv1.RegisterUserServiceHTTPServer(srv, user)
 
 	return srv
 }
