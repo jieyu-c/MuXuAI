@@ -299,16 +299,14 @@ func (x *Server_GRPC) GetTimeout() *durationpb.Duration {
 }
 
 type Data_Database struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Driver name registered with database/sql, e.g. "mysql".
-	Driver string `protobuf:"bytes,1,opt,name=driver,proto3" json:"driver,omitempty"`
-	// Driver-specific DSN. Keep credentials out of version control.
-	Source string `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"`
-	// Log every generated statement. Development only.
-	Debug bool `protobuf:"varint,3,opt,name=debug,proto3" json:"debug,omitempty"`
-	// Create or update tables from the ent schema on startup. Leave false in
-	// production and apply migrations as a separate, reviewed step.
-	AutoMigrate   bool `protobuf:"varint,4,opt,name=auto_migrate,json=autoMigrate,proto3" json:"auto_migrate,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Host          string                 `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	User          string                 `protobuf:"bytes,2,opt,name=user,proto3" json:"user,omitempty"`
+	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	Dbname        string                 `protobuf:"bytes,4,opt,name=dbname,proto3" json:"dbname,omitempty"`
+	Port          int64                  `protobuf:"varint,5,opt,name=port,proto3" json:"port,omitempty"`
+	AutoMigrate   bool                   `protobuf:"varint,6,opt,name=auto_migrate,json=autoMigrate,proto3" json:"auto_migrate,omitempty"`
+	Debug         bool                   `protobuf:"varint,7,opt,name=debug,proto3" json:"debug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -343,30 +341,51 @@ func (*Data_Database) Descriptor() ([]byte, []int) {
 	return file_conf_conf_proto_rawDescGZIP(), []int{2, 0}
 }
 
-func (x *Data_Database) GetDriver() string {
+func (x *Data_Database) GetHost() string {
 	if x != nil {
-		return x.Driver
+		return x.Host
 	}
 	return ""
 }
 
-func (x *Data_Database) GetSource() string {
+func (x *Data_Database) GetUser() string {
 	if x != nil {
-		return x.Source
+		return x.User
 	}
 	return ""
 }
 
-func (x *Data_Database) GetDebug() bool {
+func (x *Data_Database) GetPassword() string {
 	if x != nil {
-		return x.Debug
+		return x.Password
 	}
-	return false
+	return ""
+}
+
+func (x *Data_Database) GetDbname() string {
+	if x != nil {
+		return x.Dbname
+	}
+	return ""
+}
+
+func (x *Data_Database) GetPort() int64 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
 }
 
 func (x *Data_Database) GetAutoMigrate() bool {
 	if x != nil {
 		return x.AutoMigrate
+	}
+	return false
+}
+
+func (x *Data_Database) GetDebug() bool {
+	if x != nil {
+		return x.Debug
 	}
 	return false
 }
@@ -458,15 +477,18 @@ const file_conf_conf_proto_rawDesc = "" +
 	"\x04GRPC\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x123\n" +
-	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\x96\x03\n" +
+	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xd7\x03\n" +
 	"\x04Data\x125\n" +
 	"\bdatabase\x18\x01 \x01(\v2\x19.kratos.api.Data.DatabaseR\bdatabase\x12,\n" +
-	"\x05redis\x18\x02 \x01(\v2\x16.kratos.api.Data.RedisR\x05redis\x1as\n" +
-	"\bDatabase\x12\x16\n" +
-	"\x06driver\x18\x01 \x01(\tR\x06driver\x12\x16\n" +
-	"\x06source\x18\x02 \x01(\tR\x06source\x12\x14\n" +
-	"\x05debug\x18\x03 \x01(\bR\x05debug\x12!\n" +
-	"\fauto_migrate\x18\x04 \x01(\bR\vautoMigrate\x1a\xb3\x01\n" +
+	"\x05redis\x18\x02 \x01(\v2\x16.kratos.api.Data.RedisR\x05redis\x1a\xb3\x01\n" +
+	"\bDatabase\x12\x12\n" +
+	"\x04host\x18\x01 \x01(\tR\x04host\x12\x12\n" +
+	"\x04user\x18\x02 \x01(\tR\x04user\x12\x1a\n" +
+	"\bpassword\x18\x03 \x01(\tR\bpassword\x12\x16\n" +
+	"\x06dbname\x18\x04 \x01(\tR\x06dbname\x12\x12\n" +
+	"\x04port\x18\x05 \x01(\x03R\x04port\x12!\n" +
+	"\fauto_migrate\x18\x06 \x01(\bR\vautoMigrate\x12\x14\n" +
+	"\x05debug\x18\a \x01(\bR\x05debug\x1a\xb3\x01\n" +
 	"\x05Redis\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x12<\n" +

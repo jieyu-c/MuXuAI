@@ -1,3 +1,9 @@
+FROM postgres:17 AS postgres
+
+ENV POSTGRES_DB=MuXuAI \
+    POSTGRES_USER=MuXuAI \
+    POSTGRES_PASSWORD=MuXuAI
+
 FROM golang:1.25 AS builder
 
 COPY . /src

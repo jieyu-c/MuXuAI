@@ -1,6 +1,8 @@
 package data
 
 import (
+	"fmt"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"jieyuc.cn/muxu/studio/internal/conf"
@@ -11,7 +13,7 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet()
+var ProviderSet = wire.NewSet(NewData, NewUserRepo)
 
 // Data holds the long-lived storage clients shared by repos.
 type Data struct {
@@ -21,7 +23,7 @@ type Data struct {
 // NewData opens the database client and returns it with a cleanup function.
 func NewData(c *conf.Data) (*Data, func(), error) {
 	dc := c.GetDatabase()
-	db, err := gorm.Open(postgres.Open(dc.GetSource()))
+	db, err := gorm.Open(postgres.Open(DSN(dc)), &gorm.Config{})
 	if err != nil {
 		return nil, nil, err
 	}
@@ -56,7 +58,12 @@ func NewData(c *conf.Data) (*Data, func(), error) {
 	return &Data{db: db}, cleanup, nil
 }
 
+// DSN 整理数据库配置为PostgreSQL对应的格式
+func DSN(database *conf.Data_Database) string {
+	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
+		database.GetHost(), database.GetUser(), database.GetPassword(), database.GetDbname(), database.GetPort())
+}
+
 func migrate(db *gorm.DB) error {
-	// 新增数据表后需要在这里注册数据表
-	return db.AutoMigrate()
+	return db.AutoMigrate(&User{})
 }
