@@ -18,6 +18,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.ping.v1.PingResponse'
+    /api/v1/users/login:
+        post:
+            tags:
+                - UserService
+            operationId: UserService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.user.v1.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.LoginResponse'
     /api/v1/users/register:
         post:
             tags:
@@ -43,6 +61,25 @@ components:
             properties:
                 ping:
                     type: string
+        api.user.v1.LoginRequest:
+            required:
+                - phone
+                - password
+            type: object
+            properties:
+                phone:
+                    type: string
+                password:
+                    writeOnly: true
+                    type: string
+        api.user.v1.LoginResponse:
+            type: object
+            properties:
+                token:
+                    type: string
+                expiredTime:
+                    type: string
+                    format: date-time
         api.user.v1.RegisterRequest:
             required:
                 - phone

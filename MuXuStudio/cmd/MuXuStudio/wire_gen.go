@@ -30,9 +30,14 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger *slog.Logger) 
 		return nil, nil, err
 	}
 	repo := data.NewUserRepo(dataData)
-	usecase := user.NewUserUsecase(repo)
+	manager, err := server.NewTokenManager(confServer)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	usecase := user.NewUserUsecase(repo, manager, logger)
 	userService := service.NewUserService(usecase)
-	httpServer := server.NewHTTPServer(confServer, pingService, userService)
+	httpServer := server.NewHTTPServer(confServer, pingService, userService, manager)
 	app := newApp(logger, httpServer)
 	return app, func() {
 		cleanup()

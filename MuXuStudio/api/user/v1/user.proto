@@ -9,6 +9,7 @@ option java_package = "api.user.v1";
 import "google/api/annotations.proto";
 import "google/api/field_behavior.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 service UserService {
   // Register creates a phone-based account. Duplicate registrations return the
@@ -19,6 +20,23 @@ service UserService {
       body: "*"
     };
   }
+
+  rpc Login(LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/users/login"
+      body: "*"
+    };
+  }
+}
+
+message LoginRequest {
+  string phone = 1 [(google.api.field_behavior) = REQUIRED];
+  string password = 2 [(google.api.field_behavior) = REQUIRED, (google.api.field_behavior) = INPUT_ONLY];
+}
+
+message LoginResponse {
+  string token = 1;
+  google.protobuf.Timestamp expired_time = 2;
 }
 
 message RegisterRequest {

@@ -126,3 +126,26 @@ docker run --rm -p 8000:8000 -p 9000:9000 \
   -v </path/to/your/configs>:/data/conf \
   <your-image-name>
 ```
+
+## HTTP Token Authentication
+
+HTTP routes use the shared AES-256-GCM Token Manager. Configure
+`server.token.key` as a standard Base64-encoded 32-byte random key and
+`server.token.ttl` as a duration (default configuration: `7200s`). The configuration
+reads the key from `TOKEN_KEY`; missing or invalid settings stop startup.
+
+Generate and export a key before starting the service:
+
+```bash
+export TOKEN_KEY="$(openssl rand -base64 32)"
+```
+
+Keep the same key across instances and restarts to preserve token validity.
+Store it in a secret manager or deployment environment, never in source control.
+
+Send `Authorization: Bearer <token>` for protected endpoints. The exact public
+method/path pairs are listed in `internal/server/public.go`; currently registration
+and the reserved login path are public. The login RPC is not implemented yet.
+`GET /api/v1/ping` currently requires authentication. Missing, malformed, expired,
+or tampered tokens return HTTP 401. Handlers read the verified integer user ID
+with `identity.UserID(ctx)`.

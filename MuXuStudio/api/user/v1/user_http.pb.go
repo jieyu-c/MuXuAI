@@ -18,9 +18,11 @@ var _ = new(context.Context)
 
 const _ = http.SupportPackageIsVersion3
 
+const OperationUserServiceLogin = "/api.user.v1.UserService/Login"
 const OperationUserServiceRegister = "/api.user.v1.UserService/Register"
 
 type UserServiceHTTPServer interface {
+	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	// Register Register creates a phone-based account. Duplicate registrations return the
 	// generic REGISTER_FAILED error without exposing database conflict details.
 	Register(context.Context, *RegisterRequest) (*emptypb.Empty, error)
@@ -29,6 +31,7 @@ type UserServiceHTTPServer interface {
 func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r := s.Route("/")
 	r.Handle("POST", "/api/v1/users/register", _UserService_Register0_HTTP_Handler(srv))
+	r.Handle("POST", "/api/v1/users/login", _UserService_Login0_HTTP_Handler(srv))
 }
 
 func _UserService_Register0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
@@ -50,7 +53,27 @@ func _UserService_Register0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx htt
 	}
 }
 
+func _UserService_Login0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in LoginRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceLogin)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Login(ctx, req.(*LoginRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*LoginResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type UserServiceHTTPClient interface {
+	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
 	// Register Register creates a phone-based account. Duplicate registrations return the
 	// generic REGISTER_FAILED error without exposing database conflict details.
 	Register(ctx context.Context, req *RegisterRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
@@ -62,6 +85,23 @@ type UserServiceHTTPClientImpl struct {
 
 func NewUserServiceHTTPClient(client *http.Client) UserServiceHTTPClient {
 	return &UserServiceHTTPClientImpl{client}
+}
+
+func (c *UserServiceHTTPClientImpl) Login(ctx context.Context, in *LoginRequest, opts ...http.CallOption) (*LoginResponse, error) {
+	var out LoginResponse
+	pattern := "/api/v1/users/login"
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(OperationUserServiceLogin),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // Register Register creates a phone-based account. Duplicate registrations return the

@@ -2,7 +2,10 @@ package user
 
 import (
 	"context"
+	"log/slog"
 	"time"
+
+	"jieyuc.cn/muxu/studio/internal/token"
 )
 
 type User struct {
@@ -20,11 +23,13 @@ type Repo interface {
 }
 
 type Usecase struct {
-	repo Repo
+	repo         Repo
+	tokenManager *token.Manager
+	logger       *slog.Logger
 }
 
-func NewUserUsecase(repo Repo) *Usecase {
-	return &Usecase{repo: repo}
+func NewUserUsecase(repo Repo, tokenManager *token.Manager, logger *slog.Logger) *Usecase {
+	return &Usecase{repo: repo, tokenManager: tokenManager, logger: logger}
 }
 
 func (u *Usecase) Register(ctx context.Context, phone, password string) error {
@@ -40,6 +45,7 @@ func (u *Usecase) Register(ctx context.Context, phone, password string) error {
 		return err
 	}
 	if user != nil {
+		u.logger.Warn("phone is already registered")
 		return ErrUserAlreadyExists
 	}
 
@@ -58,4 +64,38 @@ func (u *Usecase) Register(ctx context.Context, phone, password string) error {
 		return err
 	}
 	return nil
+}
+
+type LoginResult struct {
+	Token    string
+	ExpireAt time.Time
+}
+
+func (u *Usecase) Login(ctx context.Context, phone, password string) (*LoginResult, error) {
+	phoneVO := Phone{phone}
+	err := phoneVO.Standardize()
+	if err != nil {
+		return nil, err
+	}
+	user, err := u.repo.FindByPhone(ctx, phoneVO)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, ErrUserNotExists
+	}
+	if !user.PasswordHash.Matches(password) {
+		return nil, ErrPasswordWrong
+	}
+	u.logger.Info("user %s", user)
+
+	authToken, expiredAt, err := u.tokenManager.Issue(ctx, int(user.ID))
+	if err != nil {
+		return nil, err
+	}
+
+	return &LoginResult{
+		Token:    authToken,
+		ExpireAt: expiredAt,
+	}, nil
 }

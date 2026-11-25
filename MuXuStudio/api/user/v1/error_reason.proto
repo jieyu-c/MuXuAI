@@ -7,4 +7,5 @@ option go_package = "jieyuc.cn/muxu/studio/api/user/v1;v1";
 enum ErrorReason {
   ERROR_REASON_UNSPECIFIED = 0;
   REGISTER_FAILED = 1;
+  LOGIN_FAILED = 2;
 }

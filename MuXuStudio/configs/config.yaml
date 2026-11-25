@@ -1,4 +1,7 @@
 server:
+  token:
+    key: ${TOKEN_KEY:qajf4CucVjpAwSi2xB9lXxa9ojRBZdYyfqsPz2YBVWw=}
+    ttl: 7200s
   http:
     addr: 0.0.0.0:8000
     timeout: 1s
