@@ -19,4 +19,7 @@ var (
 		"登录失败，请确认用户名密码是否正确")
 	ErrPasswordWrong = errors.Unauthorized(
 		v1.ErrorReason_LOGIN_FAILED.String(), "登录失败，请确认用户名密码是否正确")
+
+	ErrNotLogin = errors.Unauthorized(
+		v1.ErrorReason_NOT_LOGIN.String(), "请登录后再试一下")
 )

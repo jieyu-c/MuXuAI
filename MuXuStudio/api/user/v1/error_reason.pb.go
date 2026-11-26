@@ -27,6 +27,7 @@ const (
 	ErrorReason_ERROR_REASON_UNSPECIFIED ErrorReason = 0
 	ErrorReason_REGISTER_FAILED          ErrorReason = 1
 	ErrorReason_LOGIN_FAILED             ErrorReason = 2
+	ErrorReason_NOT_LOGIN                ErrorReason = 3
 )
 
 // Enum value maps for ErrorReason.
@@ -35,11 +36,13 @@ var (
 		0: "ERROR_REASON_UNSPECIFIED",
 		1: "REGISTER_FAILED",
 		2: "LOGIN_FAILED",
+		3: "NOT_LOGIN",
 	}
 	ErrorReason_value = map[string]int32{
 		"ERROR_REASON_UNSPECIFIED": 0,
 		"REGISTER_FAILED":          1,
 		"LOGIN_FAILED":             2,
+		"NOT_LOGIN":                3,
 	}
 )
 
@@ -74,11 +77,12 @@ var File_user_v1_error_reason_proto protoreflect.FileDescriptor
 
 const file_user_v1_error_reason_proto_rawDesc = "" +
 	"\n" +
-	"\x1auser/v1/error_reason.proto\x12\vapi.user.v1*R\n" +
+	"\x1auser/v1/error_reason.proto\x12\vapi.user.v1*a\n" +
 	"\vErrorReason\x12\x1c\n" +
 	"\x18ERROR_REASON_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fREGISTER_FAILED\x10\x01\x12\x10\n" +
-	"\fLOGIN_FAILED\x10\x02B&Z$jieyuc.cn/muxu/studio/api/user/v1;v1b\x06proto3"
+	"\fLOGIN_FAILED\x10\x02\x12\r\n" +
+	"\tNOT_LOGIN\x10\x03B&Z$jieyuc.cn/muxu/studio/api/user/v1;v1b\x06proto3"
 
 var (
 	file_user_v1_error_reason_proto_rawDescOnce sync.Once

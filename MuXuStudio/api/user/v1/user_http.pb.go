@@ -19,10 +19,12 @@ var _ = new(context.Context)
 const _ = http.SupportPackageIsVersion3
 
 const OperationUserServiceLogin = "/api.user.v1.UserService/Login"
+const OperationUserServiceMe = "/api.user.v1.UserService/Me"
 const OperationUserServiceRegister = "/api.user.v1.UserService/Register"
 
 type UserServiceHTTPServer interface {
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	Me(context.Context, *emptypb.Empty) (*MeResponse, error)
 	// Register Register creates a phone-based account. Duplicate registrations return the
 	// generic REGISTER_FAILED error without exposing database conflict details.
 	Register(context.Context, *RegisterRequest) (*emptypb.Empty, error)
@@ -32,6 +34,7 @@ func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r := s.Route("/")
 	r.Handle("POST", "/api/v1/users/register", _UserService_Register0_HTTP_Handler(srv))
 	r.Handle("POST", "/api/v1/users/login", _UserService_Login0_HTTP_Handler(srv))
+	r.Handle("GET", "/api/v1/users/me", _UserService_Me0_HTTP_Handler(srv))
 }
 
 func _UserService_Register0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
@@ -72,8 +75,28 @@ func _UserService_Login0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.C
 	}
 }
 
+func _UserService_Me0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in emptypb.Empty
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceMe)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Me(ctx, req.(*emptypb.Empty))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*MeResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type UserServiceHTTPClient interface {
 	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
+	Me(ctx context.Context, req *emptypb.Empty, opts ...http.CallOption) (rsp *MeResponse, err error)
 	// Register Register creates a phone-based account. Duplicate registrations return the
 	// generic REGISTER_FAILED error without exposing database conflict details.
 	Register(ctx context.Context, req *RegisterRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
@@ -98,6 +121,22 @@ func (c *UserServiceHTTPClientImpl) Login(ctx context.Context, in *LoginRequest,
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *UserServiceHTTPClientImpl) Me(ctx context.Context, in *emptypb.Empty, opts ...http.CallOption) (*MeResponse, error) {
+	var out MeResponse
+	pattern := "/api/v1/users/me"
+	path := http.BuildPath(pattern, in, http.WithQueryParams())
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.Operation(OperationUserServiceMe),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

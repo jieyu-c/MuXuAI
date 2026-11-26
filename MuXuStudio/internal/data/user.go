@@ -76,3 +76,13 @@ func (u *UserRepo) Create(ctx context.Context, user *userpkg.User) error {
 	err := gorm.G[User](u.data.db).Create(ctx, toPO(user))
 	return err
 }
+
+func (u *UserRepo) FindById(ctx context.Context, id uint) (*userpkg.User, error) {
+	userPo, err := gorm.G[User](u.data.db).Where("id = ?", id).First(ctx)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	return toDomain(userPo), nil
+}

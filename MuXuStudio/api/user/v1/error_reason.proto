@@ -8,4 +8,5 @@ enum ErrorReason {
   ERROR_REASON_UNSPECIFIED = 0;
   REGISTER_FAILED = 1;
   LOGIN_FAILED = 2;
+  NOT_LOGIN = 3;
 }

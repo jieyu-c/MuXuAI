@@ -36,6 +36,18 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.user.v1.LoginResponse'
+    /api/v1/users/me:
+        get:
+            tags:
+                - UserService
+            operationId: UserService_Me
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.MeResponse'
     /api/v1/users/register:
         post:
             tags:
@@ -80,6 +92,11 @@ components:
                 expiredTime:
                     type: string
                     format: date-time
+        api.user.v1.MeResponse:
+            type: object
+            properties:
+                phone:
+                    type: string
         api.user.v1.RegisterRequest:
             required:
                 - phone

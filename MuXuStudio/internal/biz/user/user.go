@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"time"
 
+	"jieyuc.cn/muxu/studio/internal/identity"
 	"jieyuc.cn/muxu/studio/internal/token"
 )
 
@@ -20,6 +21,7 @@ type User struct {
 type Repo interface {
 	FindByPhone(context.Context, Phone) (*User, error)
 	Create(context.Context, *User) error
+	FindById(context.Context, uint) (*User, error)
 }
 
 type Usecase struct {
@@ -97,5 +99,26 @@ func (u *Usecase) Login(ctx context.Context, phone, password string) (*LoginResu
 	return &LoginResult{
 		Token:    authToken,
 		ExpireAt: expiredAt,
+	}, nil
+}
+
+type UserInfo struct {
+	Phone string
+}
+
+func (u *Usecase) Me(ctx context.Context) (*UserInfo, error) {
+	userId, exists := identity.UserID(ctx)
+	if !exists {
+		return nil, ErrNotLogin
+	}
+	userVO, err := u.repo.FindById(ctx, uint(userId))
+	if err != nil {
+		return nil, err
+	}
+	if userVO == nil {
+		return nil, ErrNotLogin
+	}
+	return &UserInfo{
+		Phone: userVO.Phone.Desensitize(),
 	}, nil
 }

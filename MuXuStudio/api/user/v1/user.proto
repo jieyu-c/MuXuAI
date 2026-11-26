@@ -27,6 +27,12 @@ service UserService {
       body: "*"
     };
   }
+
+  rpc Me(google.protobuf.Empty) returns (MeResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users/me"
+    };
+  }
 }
 
 message LoginRequest {
@@ -44,4 +50,8 @@ message RegisterRequest {
   string phone = 1 [(google.api.field_behavior) = REQUIRED];
   // Plaintext password, sent over HTTPS and hashed before storage. Never logged.
   string password = 2 [(google.api.field_behavior) = REQUIRED, (google.api.field_behavior) = INPUT_ONLY];
+}
+
+message MeResponse {
+  string phone = 1;
 }

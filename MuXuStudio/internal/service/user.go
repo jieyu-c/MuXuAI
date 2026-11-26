@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	v1 "jieyuc.cn/muxu/studio/api/user/v1"
 	userbiz "jieyuc.cn/muxu/studio/internal/biz/user"
@@ -32,5 +32,15 @@ func (u *UserService) Login(ctx context.Context, request *v1.LoginRequest) (*v1.
 	return &v1.LoginResponse{
 		Token:       result.Token,
 		ExpiredTime: timestamppb.New(result.ExpireAt),
+	}, nil
+}
+
+func (u UserService) Me(ctx context.Context, empty *emptypb.Empty) (*v1.MeResponse, error) {
+	userInfo, err := u.usecase.Me(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.MeResponse{
+		Phone: userInfo.Phone,
 	}, nil
 }

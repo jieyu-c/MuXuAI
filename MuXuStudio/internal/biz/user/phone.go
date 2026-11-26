@@ -34,3 +34,7 @@ func (p *Phone) Standardize() error {
 	}
 	return nil
 }
+
+func (p *Phone) Desensitize() string {
+	return p.Value[:6] + "****" + p.Value[10:]
+}
